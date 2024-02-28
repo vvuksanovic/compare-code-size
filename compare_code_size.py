@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 # text    data     bss    dec     hex    filename
 # 164       0       0     164      a4    libstubs.c.o (ex /home/syrmia/llvm-nanomips/llvm-test-suite-nanomips-build-1/libstubs.a)
 
-def collectCodeSizeData(build_path, command, commandArgs) -> pd.DataFrame:
+def collectCodeSizeData(build_path, size_tool, size_tool_args) -> pd.DataFrame:
 
     build_abs_path = os.path.abspath(build_path)
 
@@ -33,7 +33,7 @@ def collectCodeSizeData(build_path, command, commandArgs) -> pd.DataFrame:
             if file_output.find("executable") == -1:
                 continue
 
-            processsRetVal = subprocess.run([command] + commandArgs + [os.path.join(root, file)],
+            processsRetVal = subprocess.run([size_tool] + size_tool_args + [os.path.join(root, file)],
                                             capture_output=True
                                            )
             # Skip all files with unrecognized format.
@@ -69,39 +69,39 @@ def collectCodeSizeData(build_path, command, commandArgs) -> pd.DataFrame:
 
     return data
 
-def parse_program_args(parser):
+def parse_program_args():
+    parser = argparse.ArgumentParser(description='Search for executables and generate code size diff.')
     parser.add_argument('directory_path_1', metavar='directory_path_1', action="store",
                     help="The first directory to search for executables.")
     parser.add_argument('directory_path_2', metavar='directory_path_2', action="store",
                 help="The second directory to search for executables.")
-    parser.add_argument('command', metavar='command', action="store",
-                        help='command to run the tests')
-    parser.add_argument('command_arg', metavar='command_arg', action="store", nargs='*',
-                        help='command arguments')
+    parser.add_argument('size_tool', metavar='size_tool', action="store", default='size',
+                        help='path to size tool')
+    parser.add_argument('size_tool_args', metavar='size_tool_args', action="store", nargs='*',
+                        help='arguments for size tool')
     return parser.parse_args()
 
 def Main():
+    args = parse_program_args()
 
-    parser = argparse.ArgumentParser(description='Search for executables and generate code size diff.')
-    args = parse_program_args(parser)
-
-    for i in range(len(args.command_arg)):
-        if not args.command_arg[i].startswith("-") and args.command_arg[i-1] != '-o':
-            args.command_arg[i] = "-" + args.command_arg[i]
+    for i in range(len(args.size_tool_args)):
+        if not args.size_tool_args[i].startswith("-") and args.size_tool_args[i-1] != '-o':
+            args.size_tool_args[i] = "-" + args.size_tool_args[i]
 
     print("First  build -> data1: ", args.directory_path_1)
     print("Second build -> data2: ", args.directory_path_2)
-    print("command: ", args.command)
-    print("command args: ", args.command_arg)
+    print("Size tool: ", args.size_tool)
+    print("Size tool args: ", args.size_tool_args)
+
 
     try:
-        data1 = collectCodeSizeData(args.directory_path_1, args.command, args.command_arg)
+        data1 = collectCodeSizeData(args.directory_path_1, args.size_tool, args.size_tool_args)
     except subprocess.CalledProcessError as e:
         print(e.returncode)
         exit()
 
     try:
-        data2 = collectCodeSizeData(args.directory_path_2, args.command, args.command_arg)
+        data2 = collectCodeSizeData(args.directory_path_2, args.size_tool, args.size_tool_args)
     except subprocess.CalledProcessError as e:
         print(e.returncode)
         exit()
