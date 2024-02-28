@@ -93,6 +93,15 @@ def Main():
     print("Size tool: ", args.size_tool)
     print("Size tool args: ", args.size_tool_args)
 
+    file_command_result = subprocess.run(["file", "--version"], capture_output=True)
+    if file_command_result.returncode != 0:
+        print("Failed to run file command")
+        exit(1)
+
+    size_command_result = subprocess.run([args.size_tool, "--version"], capture_output=True)
+    if size_command_result.returncode != 0:
+        print("Failed to run size tool")
+        exit(1)
 
     try:
         data1 = collectCodeSizeData(args.directory_path_1, args.size_tool, args.size_tool_args)
