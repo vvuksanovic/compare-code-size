@@ -30,7 +30,7 @@ def collectCodeSizeData(build_path, size_tool, size_tool_args) -> pd.DataFrame:
             file_processsRetVal = subprocess.run(["file", os.path.join(root, file)], capture_output=True)
             file_processsRetVal.check_returncode()
             file_output = file_processsRetVal.stdout.decode('utf-8')
-            if file_output.find("executable") == -1:
+            if file_output.find("ELF") == -1 or file_output.find("executable") == -1:
                 continue
 
             processsRetVal = subprocess.run([size_tool] + size_tool_args + [os.path.join(root, file)],
