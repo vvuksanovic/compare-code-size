@@ -149,6 +149,8 @@ def Main():
     positive_percentage_num = positive_percentage_mask.sum()
     print("Num of percentage greater that zero: ", positive_percentage_num)
 
+    show_plots = False
+
     if positive_percentage_num > 0:
 
         n = 20
@@ -159,6 +161,7 @@ def Main():
 
         max_x_value = top_n_savings['dec_x'].astype(float).max()
 
+        plt.figure(1, figsize=[12,8])
         plt.title("Savings", fontsize=25)
         plt.barh(np.arange(n), np.array(top_n_savings['dec_x']), label="before", edgecolor='orange', color='none')
         plt.barh(np.arange(n), np.array(top_n_savings['dec_y']), label="after")
@@ -175,7 +178,7 @@ def Main():
             # Print "-" for positive percentage to be more intuitive, because size is decreased
             plt.text(dec_pair[0]+max_x_value*0.1, i, "-" + str(round(dec_pair[2],2)) + "%", color='orange')
         plt.legend(loc='best')
-        plt.show()
+        show_plots = True
 
     else:
         print("No saving in code size.")
@@ -196,6 +199,7 @@ def Main():
 
         max_x_value = top_n_regressions['dec_x'].astype(float).max()
 
+        plt.figure(2, figsize=[12,8])
         plt.title("Regressions", fontsize=25)
         plt.barh(np.arange(n), np.array(top_n_regressions['dec_y']), label="after")
         plt.barh(np.arange(n), np.array(top_n_regressions['dec_x']), label="before", edgecolor='orange', color='none')
@@ -212,10 +216,13 @@ def Main():
             # Print "+" for negative percentage to be more intuitive, because size is increased
             plt.text(dec_pair[0]+max_x_value*0.1, i, "+" + str(-1*round(dec_pair[2],2)) + "%", color='blue')
         plt.legend(loc='lower right')
-        plt.show()
+        show_plots = True
 
     else:
         print("No regressions in code size.")
+
+    if show_plots:
+        plt.show()
 
 if __name__ == "__main__":
   Main()
