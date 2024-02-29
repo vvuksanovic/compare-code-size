@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 
+CLEAR_LINE = '\x1b[2K'
+
 # Output format (Berkeley):
 # text    data     bss    dec     hex    filename
 # 164       0       0     164      a4    libstubs.c.o (ex /home/syrmia/llvm-nanomips/llvm-test-suite-nanomips-build-1/libstubs.a)
@@ -32,6 +34,8 @@ def collectCodeSizeData(build_path, size_tool, size_tool_args) -> pd.DataFrame:
             file_output = file_processsRetVal.stdout.decode('utf-8')
             if file_output.find("ELF") == -1 or file_output.find("executable") == -1:
                 continue
+
+            print(CLEAR_LINE + 'Processing ' + file_base, end='\r')
 
             processsRetVal = subprocess.run([size_tool] + size_tool_args + [os.path.join(root, file)],
                                             capture_output=True
@@ -67,6 +71,7 @@ def collectCodeSizeData(build_path, size_tool, size_tool_args) -> pd.DataFrame:
             # Append new row
             data.loc[len(data),] = values
 
+    print(CLEAR_LINE, end='')
     return data
 
 def parse_program_args():
@@ -103,12 +108,14 @@ def Main():
         print("Failed to run size tool")
         exit(1)
 
+    print('Collecting data for build 1')
     try:
         data1 = collectCodeSizeData(args.directory_path_1, args.size_tool, args.size_tool_args)
     except subprocess.CalledProcessError as e:
         print(e.returncode)
         exit()
 
+    print('Collecting data for build 2')
     try:
         data2 = collectCodeSizeData(args.directory_path_2, args.size_tool, args.size_tool_args)
     except subprocess.CalledProcessError as e:
@@ -116,8 +123,8 @@ def Main():
         exit()
 
     print("################ Results ################")
-    print("data1.shape: ", data1.shape)
-    print("data2.shape: ", data2.shape)
+    print("data1 size: ", data1.shape[0])
+    print("data2 size: ", data2.shape[0])
 
     # 'dec' = 'text' + 'data' + 'bss'
     code_size1 = data1['dec'].sum()
@@ -125,12 +132,18 @@ def Main():
 
     if code_size1 > code_size2:
         print("We have savings in code size!")
-    print("Difference: ", code_size1 - code_size2)
+    else:
+        print("We have regression in code size!")
+    print("Savings: ", code_size1 - code_size2, " bytes")
 
+    savings_counter = 0
     regression_counter = 0
     for diff in data1['dec'] - data2['dec']:
         if diff < 0:
-            regression_counter = regression_counter +1
+            regression_counter = regression_counter + 1
+        elif diff > 0:
+            savings_counter = savings_counter + 1
+    print("We have savings in " + str(savings_counter) + " files." )
     print("We have regression in " + str(regression_counter) + " files." )
     print("###########################################")
 
