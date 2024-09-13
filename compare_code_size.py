@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import argparse
 import pandas as pd
@@ -194,7 +195,7 @@ def Main():
     else:
         print("No regressions in code size.")
 
-    print(merged_data.to_string())
+    print(merged_data.to_string(), file=sys.stderr)
 
 
 if __name__ == "__main__":
