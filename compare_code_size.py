@@ -181,7 +181,7 @@ def Main():
     else:
         print("No saving in code size.")
 
-    merged_data = merged_data.sort_values('percentage', ascending=True)
+    merged_data = merged_data.sort_values('diff', ascending=True)
 
     negative_percentage_mask = np.array(list(merged_data['percentage'].astype(float))) < 0
     negative_percentage_num = negative_percentage_mask.sum()
