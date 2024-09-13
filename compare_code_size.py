@@ -3,7 +3,6 @@ import subprocess
 import argparse
 import pandas as pd
 import numpy as np
-from matplotlib import pyplot as plt
 
 CLEAR_LINE = '\x1b[2K'
 
@@ -172,26 +171,6 @@ def Main():
         top_n_savings = merged_data.head(n)
 
         max_x_value = top_n_savings['dec_x'].astype(float).max()
-
-        plt.figure(1, figsize=[12,8])
-        plt.title("Savings", fontsize=25)
-        plt.barh(np.arange(n), np.array(top_n_savings['dec_x']), label="before", edgecolor='orange', color='none')
-        plt.barh(np.arange(n), np.array(top_n_savings['dec_y']), label="after")
-        plt.yticks(np.arange(n), np.array(top_n_savings['filename']))
-        plt.xticks(np.arange(start=0, stop=int(max_x_value * 1.2), step=int(top_n_savings['dec_x'].max()*1.2) // 30), rotation=270)
-        plt.ylabel("Top " + str(n) + " savings (by percentage)")
-        plt.xlabel("Code size (bytes)")
-        # A (dec_x, 0)
-        # B (dec_x, i)
-        dec_pairs = zip(list(top_n_savings['dec_x']), list(top_n_savings['dec_y']), list(top_n_savings['percentage']))
-        for i, dec_pair in enumerate(dec_pairs):
-            plt.text(dec_pair[0]+50, i+0.2, str(dec_pair[0]), color='orange')
-            plt.text(dec_pair[0]+50, i-0.2, str(dec_pair[1]), color='blue')
-            # Print "-" for positive percentage to be more intuitive, because size is decreased
-            plt.text(dec_pair[0]+max_x_value*0.1, i, "-" + str(round(dec_pair[2],2)) + "%", color='orange')
-        plt.legend(loc='best')
-        show_plots = True
-
     else:
         print("No saving in code size.")
 
@@ -211,32 +190,12 @@ def Main():
 
         max_x_value = top_n_regressions['dec_x'].astype(float).max()
 
-        plt.figure(2, figsize=[12,8])
-        plt.title("Regressions", fontsize=25)
-        plt.barh(np.arange(n), np.array(top_n_regressions['dec_y']), label="after")
-        plt.barh(np.arange(n), np.array(top_n_regressions['dec_x']), label="before", edgecolor='orange', color='none')
-        plt.yticks(np.arange(n), np.array(top_n_regressions['filename']))
-        plt.xticks(np.arange(start=0, stop=int(max_x_value*1.2), step=int(top_n_regressions['dec_x'].max()*1.2) // 30), rotation=270)
-        plt.ylabel("Top " + str(n) + " regressions (by percentage)")
-        plt.xlabel("Code size (bytes)")
-        # A (dec_x, 0)
-        # B (dec_x, i)
-        dec_pairs = zip(list(top_n_regressions['dec_x']), list(top_n_regressions['dec_y']), list(top_n_regressions['percentage']))
-        for i, dec_pair in enumerate(dec_pairs):
-            plt.text(dec_pair[0]+50, i+0.2, str(dec_pair[0]), color='orange')
-            plt.text(dec_pair[0]+50, i-0.2, str(dec_pair[1]), color='blue')
-            # Print "+" for negative percentage to be more intuitive, because size is increased
-            plt.text(dec_pair[0]+max_x_value*0.1, i, "+" + str(-1*round(dec_pair[2],2)) + "%", color='blue')
-        plt.legend(loc='lower right')
-        show_plots = True
 
     else:
         print("No regressions in code size.")
 
     print(merged_data.to_string())
 
-    if show_plots and args.show_plots:
-        plt.show()
 
 if __name__ == "__main__":
   Main()
