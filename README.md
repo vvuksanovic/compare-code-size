@@ -27,7 +27,7 @@ pip install -r requirements.txt
 ### Required installed tools:
 
 - `size` - list section sizes and total size of binary files (https://www.gnu.org/software/binutils/)
-- `file` - determine file type (https://darwinsys.com/file/)
+- `file` - determine file type (https://www.man7.org/linux/man-pages/man1/file.1.html)
 
 ### Usage:
 

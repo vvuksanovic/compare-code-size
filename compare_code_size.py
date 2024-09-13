@@ -25,15 +25,13 @@ def collectCodeSizeData(build_path, size_tool, size_tool_args) -> pd.DataFrame:
             # Skip object files
             file_root, file_base = os.path.split(file)
             ext = os.path.splitext(file_base)[1]
-            if ext == '.o':
-                continue
-
-            # Check if file is executable
-            file_processsRetVal = subprocess.run(["file", os.path.join(root, file)], capture_output=True)
-            file_processsRetVal.check_returncode()
-            file_output = file_processsRetVal.stdout.decode('utf-8')
-            if file_output.find("ELF") == -1 or file_output.find("executable") == -1:
-                continue
+            if ext != '.o' and ext != '.a' and ext != '.so':
+                # Check if file is executable
+                file_processsRetVal = subprocess.run(["file", os.path.join(root, file)], capture_output=True)
+                file_processsRetVal.check_returncode()
+                file_output = file_processsRetVal.stdout.decode('utf-8')
+                if file_output.find("ELF") == -1 or file_output.find("executable") == -1:
+                    continue
 
             print(CLEAR_LINE + 'Processing ' + file_base, end='\r')
 
@@ -84,6 +82,7 @@ def parse_program_args():
                         help='path to size tool')
     parser.add_argument('size_tool_args', metavar='size_tool_args', action="store", nargs='*',
                         help='arguments for size tool')
+    parser.add_argument('--show-plots', dest='show_plots', action="store_true", help='display chart with most changed files')
     return parser.parse_args()
 
 def Main():
@@ -234,7 +233,9 @@ def Main():
     else:
         print("No regressions in code size.")
 
-    if show_plots:
+    print(merged_data.to_string())
+
+    if show_plots and args.show_plots:
         plt.show()
 
 if __name__ == "__main__":
