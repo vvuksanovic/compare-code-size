@@ -43,10 +43,16 @@ def collectCodeSizeData(build_path, size_tool, size_tool_args) -> pd.DataFrame:
                 continue
 
             # Raise exception if other erros occured.
-            processsRetVal.check_returncode()
+            # processsRetVal.check_returncode()
+            if processRetVal.returncode != 0:
+                print("Size returned " + str(processRetVal.returncode) + " for " + os.path.join(root, file), file=sys.stderr)
+                continue
 
             # Get 'size' output as a string
             Output = processsRetVal.stdout.decode('utf-8')
+            if "bss" not in Output or len(Output.split(sep='\n')) < 2:
+                print("Invalid output for " + os.path.join(root, file) + ": " + Output, file=sys.stderr)
+                continue
 
             values = []
             # Process output values into list
